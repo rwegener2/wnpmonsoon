@@ -23,7 +23,7 @@ class SpatialSubset(luigi.Task):
         raise NotImplementedError
 
 
-class MonthSubset(luigi.Task):
+class TemporalSubset(luigi.Task):
     def requires(self):
         return []
 
@@ -45,12 +45,19 @@ class WindSpeedUnitConversion(luigi.Task):
         raise NotImplementedError
 
 
+class GettingUCData(luigi.Task):
+    def output(self):
+        return '/snfs1/users/nasa_develop/Fall2017/luigi/preprocessing_cmip5/preprocessing_cmip5/'
+
+
 class PrecipitationUnitConversion(luigi.Task):
+
     def requires(self):
-        return []
+        return GettingUCData()
 
     def output(self):
-        return luigi.LocalTarget("")
+        # return luigi.LocalTarget('/snfs1/users/nasa_develop/Fall2017/luigi/preprocessing_cmip5/unit_conversion/')
+        return luigi.LocalTarget(r"C:\repos\luigi\preprocessing_cmip5\unit_conversion")
 
     def run(self):
         raise NotImplementedError

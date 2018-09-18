@@ -1,0 +1,11 @@
+For the concatenation command, you run:
+
+ncrcat "some string that idenifies the input files names eg. CNCM5_pr_*" "output file path/name"
+
+Note: there were some files that were not successfully concatenated in this way, possibly due to some record dimension error. I will investigate in the coming days.
+
+To subset spatially you can run:
+
+ncea -d "lat",0.0,40.0 -d "lon",XXX.0,XXX.0 "input file(s) name identifier" "output file path(s)/name(s)"
+
+Note: the "lon" values might need to change depending on the reference of the model eg. 0 to 360 or -180 to 180
