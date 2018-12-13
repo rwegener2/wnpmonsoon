@@ -1,5 +1,0 @@
-numpy
-pandas
-geopandas
-luigi
-netcdf4

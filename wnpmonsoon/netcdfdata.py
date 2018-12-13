@@ -5,7 +5,7 @@ from netCDF4 import num2date
 
 
 class NetcdfData(object):
-    def __init__(self, file_, variable, create_new=None):
+    def __init__(self, file_, variable, create_new=False):
         if not create_new:
             dataset = nc.Dataset(file_, 'r+')
             self.var_name = variable
@@ -56,21 +56,21 @@ class NetcdfData(object):
 
     def write(self, output_filename, time_var=None, time_units=None, lats=None, lons=None, var_name=None, variable=None,
               var_units=None, calendar=None):
-        if time_var is None:
+        if not time_var:
             time_var = self.time
-        if time_units is None:
+        if not time_units:
             time_units = self.t_units
-        if lats is None:
+        if not lats:
             lats = self.lats
-        if lons is None:
+        if not lons:
             lons = self.lons
-        if var_name is None:
+        if not var_name:
             var_name = self.var_name
-        if variable is None:
+        if not variable:
             variable = self.variable
-        if var_units is None:
+        if not var_units:
             var_units = self.var_units
-        if calendar is None:
+        if not calendar:
             calendar = self.calendar
         # TODO all other positional args will be optional message
         writer = NetCDFWriter(output_filename)
