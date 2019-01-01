@@ -1,6 +1,7 @@
 import luigi
 
 
+# TODO consider condensing tasks - must save output after each task could make lots of storage quickly
 class YearConcat(luigi.Task):
     def requires(self):
         return []

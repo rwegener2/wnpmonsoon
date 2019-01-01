@@ -1,5 +1,4 @@
-from netcdfdata import NetcdfData
-import pytest
+from wnpmonsoon.netcdfdata import NetcdfData
 
 
 def test_first_point():

@@ -1,1 +1,1 @@
-.idea/
+bash_tasks.txt

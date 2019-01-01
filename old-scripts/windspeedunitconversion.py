@@ -1,4 +1,4 @@
-from netcdfdata import NetcdfData
+from wnpmonsoon.netcdfdata import NetcdfData
 import numpy as np
 
 uas = NetcdfData(file_, 'uas')
