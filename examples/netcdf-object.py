@@ -1,10 +1,10 @@
 from wnpmonsoon.netcdfdata import NetcdfData
 from wnpmonsoon.wind_direction import wind_direction
 
-folder = r"C:\repos\luigi-database\preprocessing_cmip5\spatial_subset\ACCESS1-0"
-precip_test_file = folder + r"\pr_day_ACCESS1-0_rcp85_r1i1p1_20060101-21001231_spatial_clip.nc"
-uas_test_file = folder + r"\uas_day_ACCESS1-0_rcp85_r1i1p1_20060101-21001231_spatial_clip.nc"
-vas_test_file = folder + r"\vas_day_ACCESS1-0_rcp85_r1i1p1_20060101-21001231_spatial_clip.nc"
+folder = r"C:\repos\wnpmonsoon-testdata"
+precip_test_file = folder + r"\ACCESS1-0\pr_day_ACCESS1-0_rcp85_r1i1p1_1year_spatial_clip.nc"
+uas_test_file = folder + r"\CMCC-CM\uas_day_CMCC-CM_rcp85_r1i1p1_1year_spatial_clip.nc"
+vas_test_file = folder + r"\CNRM-CM5\vas_day_CNRM-CM5_rcp85_r1i1p1_1year_spatial_clip.nc"
 
 precip_access0 = NetcdfData(precip_test_file, 'pr')
 

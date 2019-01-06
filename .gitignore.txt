@@ -1,1 +1,2 @@
 bash_tasks.txt
+tests/data/

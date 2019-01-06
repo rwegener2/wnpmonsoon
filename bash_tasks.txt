@@ -9,3 +9,13 @@ To subset spatially you can run:
 ncea -d "lat",0.0,40.0 -d "lon",XXX.0,XXX.0 "input file(s) name identifier" "output file path(s)/name(s)"
 
 Note: the "lon" values might need to change depending on the reference of the model eg. 0 to 360 or -180 to 180
+
+To subset temporally:
+
+ncea -F -d time,first,last in.out out.nc
+
+Ex.
+ncea -F -d "time",764200.5,764565.5 pr_day_ACCESS1-0_rcp85_r1i1p1_20060101-21001231_spatial_clip.nc pr_day_ACCESS1-0_rcp85_r1i1p1_1year_spatial_clip.nc
+
+Notes on Powershell
+ls -Force (ls -a)
