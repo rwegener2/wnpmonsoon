@@ -1,6 +1,5 @@
 from wnpmonsoon.netcdfdata import NetcdfData
 import numpy as np
-import os
 
 
 def degfromnorth(uas, vas):
