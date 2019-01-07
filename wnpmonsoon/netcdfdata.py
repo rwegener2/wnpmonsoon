@@ -5,16 +5,17 @@ import numpy as np
 
 class NetcdfData(object):
     def __init__(self, file_):
-        dataset = nc.Dataset(file_, 'r+')
-        self.var_name = list(dataset.variables.keys())[-1]
-        self.model_id = dataset.model_id
-        self.var_units = dataset.variables[self.var_name].units
-        self.variable = np.asarray(dataset.variables[self.var_name][:])
-        self.lats = np.asarray(dataset.variables['lat'])
-        self.lons = np.asarray(dataset.variables['lon'])
-        self.time = np.asarray(dataset.variables['time'])
-        self.calendar = dataset.variables['time'].calendar
-        self.t_units = dataset.variables['time'].units
+        with nc.Dataset(file_, 'r+') as dataset:
+            print('ncattrs are ', dataset.ncattrs())
+            self.var_name = list(dataset.variables.keys())[-1]
+            self.var_units = dataset.variables[self.var_name].units
+            self.variable = np.asarray(dataset.variables[self.var_name][:])
+            self.lats = np.asarray(dataset.variables['lat'])
+            self.lons = np.asarray(dataset.variables['lon'])
+            self.time = np.asarray(dataset.variables['time'])
+            self.calendar = dataset.variables['time'].calendar
+            self.time_units = dataset.variables['time'].units
+            self.model_id = dataset.getncattr('model_id')
 
     def pr_unit_conversion(self):
         """
@@ -28,27 +29,35 @@ class NetcdfData(object):
     def write(self, output_filename, time_var=None, time_units=None, lats=None, lons=None, var_name=None, variable=None,
               var_units=None, calendar=None):
         """Write the netcdf object out to the filename provided and overwrite any variables specified by the user"""
-        if not time_var:
+        try:
+            time_var.size
+        except AttributeError:
             time_var = self.time
         if not time_units:
-            time_units = self.t_units
-        if not lats:
+            time_units = self.time_units
+        if not calendar:
+            calendar = self.calendar
+        try:
+            lats.size
+        except AttributeError:
             lats = self.lats
-        if not lons:
+        try:
+            lons.size
+        except AttributeError:
             lons = self.lons
         if not var_name:
             var_name = self.var_name
-        if not variable:
-            variable = self.variable
         if not var_units:
             var_units = self.var_units
-        if not calendar:
-            calendar = self.calendar
+        try:
+            variable.size
+        except AttributeError:
+            variable = self.variable
         writer = NetCDFWriter(output_filename)
+        writer.set_global_attributes(model_id=self.model_id)
         writer.create_time_variable("time", time_var, units=time_units, calendar=calendar)
         writer.create_grid_variables(lats, lons)
         writer.create_data_variable(var_name, ("time", "lat", "lon"), variable, units=var_units)
-        writer.set_global_attributes(model_id=self.model_id)
 
     def jjaso_subset(self):
         # """
