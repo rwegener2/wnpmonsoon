@@ -109,6 +109,7 @@ def test_write_overwrite_time(pr_access10):
     overwritten_file = NetcdfData(save_location)
     os.remove(save_location)
     assert_almost_equal(overwritten_file.time, fake_time_data)
+    assert overwritten_file.model_id == pr_access10.model_id
     assert overwritten_file.time_units == fake_time_units
     assert overwritten_file.calendar == fake_calendar
 
@@ -120,6 +121,7 @@ def test_write_overwrite_coords(pr_access10):
     pr_access10.write(save_location, lats=fake_lats, lons=fake_lons)
     overwritten_file = NetcdfData(save_location)
     os.remove(save_location)
+    assert overwritten_file.model_id == pr_access10.model_id
     assert_almost_equal(overwritten_file.lats, fake_lats)
     assert_almost_equal(overwritten_file.lons, fake_lons)
 
@@ -135,3 +137,4 @@ def test_write_overwrite_variable(pr_access10):
     assert_almost_equal(overwritten_file.variable, fake_var_data)
     assert overwritten_file.var_units == fake_var_unit
     assert overwritten_file.var_name == fake_var_name
+    assert overwritten_file.model_id == pr_access10.model_id

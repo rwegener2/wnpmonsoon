@@ -1,4 +1,5 @@
 from wnpmonsoon.netcdf import NetCDFWriter
+from netCDF4 import num2date, date2num
 import netCDF4 as nc
 import numpy as np
 
@@ -25,6 +26,23 @@ class NetcdfData(object):
             raise TypeError("Cannot run this method on a dataset that isn't precipitation flux")
         self.variable = self.variable*86400
         self.var_units = "mm hr-1"
+
+    def jjaso_subset(self):
+        """
+        Clip data down to only months of June-October
+        :return:
+        """
+        datelist = num2date(self.time, self.time_units, calendar=self.calendar)
+        # Get months and indices
+        jjaso_indices = []
+        jjaso_dates = []
+        for index, date in enumerate(datelist):
+            if date.month in list(range(6, 11)):
+                jjaso_indices.append(index)
+                jjaso_dates.append(date)
+        # Reset new variables
+        self.variable = np.delete(self.variable, jjaso_indices, axis=0)
+        self.time = date2num(jjaso_dates, units=self.time_units, calendar=self.calendar)
 
     def write(self, output_filename, time_var=None, time_units=None, lats=None, lons=None, var_name=None, variable=None,
               var_units=None, calendar=None):
@@ -58,35 +76,6 @@ class NetcdfData(object):
         writer.create_time_variable("time", time_var, units=time_units, calendar=calendar)
         writer.create_grid_variables(lats, lons)
         writer.create_data_variable(var_name, ("time", "lat", "lon"), variable, units=var_units)
-
-    def jjaso_subset(self):
-        # """
-        # take input netcdf and output netcdf with only months June-October
-        # :return:
-        # """
-        # from netCDF4 import num2date
-        # datelist = num2date(self.time, self.t_units, calendar='proleptic_gregorian')
-        #
-        # # create empty matricies to hold new data
-        # cnt = 0
-        # model_pr_new = np.full((len(yrindx), model_pr.shape[1], model_pr.shape[2]), np.NaN)
-        # time_new = np.full([len(yrindx), ], np.NaN)
-        #
-        # # fill new model matricies with data
-        # for k in yrindx:
-        #     model_pr_new[cnt] = model_pr[int(k)]
-        #     time_new[cnt] = k
-        #     cnt += 1
-        #
-        # time_new = np.array(time_new)
-        # return [JJASO, JJASO_times]
-        raise NotImplementedError
-
-    def yearly_subset(self, start_year, end_year):
-        """
-        clip netcdf to year range specified by inputs
-        """
-        raise NotImplementedError
 
     def filename_generator(self):
         # """
