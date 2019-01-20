@@ -1,4 +1,5 @@
-from wnpmonsoon.wind_direction import degfromnorth
+from wnpmonsoon.wind_direction import degfromnorth, wind_direction
+import tempfile
 import numpy as np
 
 
@@ -58,3 +59,12 @@ def test_all_as_array():
     uas = np.array([1, 1, 0, -np.sqrt(3), -1, np.sqrt(3), -1, -np.sqrt(3), -1, 1, -1, np.sqrt(3)])
     vas = np.array([1, np.sqrt(3), 1, 1, -1, -1, 0, -1, np.sqrt(3), -1, 1, -1])
     assert (degfromnorth(uas, vas) == np.array([225, 210, 180, 120, 45, 300, 90, 60, 150, 315, 135, 300])).all()
+
+
+def test_wind_direction(path_uas_cmcccm, path_vas_cmcccm):
+    pass
+    # save_location = tempfile.NamedTemporaryFile().name + '.nc'
+    # wind_dir = wind_direction(path_uas_cmcccm, path_vas_cmcccm, save_location)
+    # assert wind_dir.var_name == 'wdir'
+    # assert wind_dir.var_units == 'degrees clockwise from north'
+    # assert_almost_equal()  # TODO add test data once nan issue fixed

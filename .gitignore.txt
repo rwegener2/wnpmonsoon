@@ -1,2 +1,5 @@
-bash_tasks.txt
+.idea/
 tests/data/
+tests/__pycache__/
+wnpmonsoon/__pycache__/
+wnpmonsoon.egg-info/
