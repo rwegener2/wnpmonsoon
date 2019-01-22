@@ -1,5 +1,6 @@
 from wnpmonsoon.netcdfdata import NetcdfData
 from numpy.testing import assert_almost_equal
+from netCDF4 import num2date
 import netCDF4 as nc
 import numpy as np
 import tempfile
@@ -138,3 +139,13 @@ def test_write_overwrite_variable(pr_access10):
     assert overwritten_file.var_units == fake_var_unit
     assert overwritten_file.var_name == fake_var_name
     assert overwritten_file.model_id == pr_access10.model_id
+
+
+def test_jjaso(pr_access_10):
+    pr_access_10.jjaso_subset()
+    first_day = num2date(pr_access_10.time[1], units=pr_access_10.time_units, calendar=pr_access_10.calendar)
+    last_day = num2date(pr_access_10.time[-1], units=pr_access_10.time_units, calendar=pr_access_10.calendar)
+    assert first_day.month == 6
+    assert first_day.day == 1
+    assert last_day.month == 10
+    assert last_day.day == 31

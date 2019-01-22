@@ -17,6 +17,7 @@ class NetcdfData(object):
             self.calendar = dataset.variables['time'].calendar
             self.time_units = dataset.variables['time'].units
             self.model_id = dataset.getncattr('model_id')
+            # TODO other global attributes as a dict
 
     def pr_unit_conversion(self):
         """
@@ -43,6 +44,16 @@ class NetcdfData(object):
         # Reset new variables
         self.variable = np.delete(self.variable, jjaso_indices, axis=0)
         self.time = date2num(jjaso_dates, units=self.time_units, calendar=self.calendar)
+        # TODO custom global attribute column that tracks this
+
+    def filename_generator(self):
+        # """
+        # returns a string with an ideal filename for the file
+        # :return:
+        # """
+        # TODO os.path.join with different split character?
+        # return os.path.join(self.var_name, <t_res>, self.model_id, rcp85, r1i1p1, custom modifiers (i.e. jjaso))
+        raise NotImplementedError
 
     def write(self, output_filename, time_var=None, time_units=None, lats=None, lons=None, var_name=None, variable=None,
               var_units=None, calendar=None):
@@ -72,32 +83,10 @@ class NetcdfData(object):
         except AttributeError:
             variable = self.variable
         writer = NetCDFWriter(output_filename)
+        # TODO for global attribute setter: extract string of variable name
         writer.set_global_attributes(model_id=self.model_id)
         writer.create_time_variable("time", time_var, units=time_units, calendar=calendar)
         writer.create_grid_variables(lats, lons)
         writer.create_data_variable(var_name, ("time", "lat", "lon"), variable, units=var_units)
 
-    def filename_generator(self):
-        # """
-        # returns a string with an ideal filename for the file
-        # :return:
-        # """
-        # # TODO maybe not possible to make general enough for all models and temporal situations
-        # return self.var_name + '_' + self.model_id
-        raise NotImplementedError
 
-    @classmethod
-    def wd_from_existing(cls, existing, wd_data):
-        # obj = cls.__new__(cls)
-        # # existing_nc = cls(file_=existing, )
-        # obj.var_name = 'wd'
-        # obj.model_id = existing.model_id
-        # obj.var_units = 'degrees clockwise from north'
-        # obj.variable = wd_data
-        # obj.lats = existing.lats
-        # obj.lons = existing.lons
-        # obj.time = existing.time
-        # obj.calendar = existing.calendar
-        # obj.t_units = existing.t_units
-        # return obj
-        raise NotImplementedError

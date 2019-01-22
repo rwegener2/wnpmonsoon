@@ -2,7 +2,8 @@ For the concatenation command, you run:
 
 ncrcat "some string that idenifies the input files names eg. CNCM5_pr_*" "output file path/name"
 
-Note: there were some files that were not successfully concatenated in this way, possibly due to some record dimension error. I will investigate in the coming days.
+Note: there were some files that were not successfully concatenated in this way, possibly due to some record dimension
+error. I will investigate in the coming days.
 
 To subset spatially you can run:
 
