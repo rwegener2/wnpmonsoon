@@ -1,4 +1,4 @@
-from wnpmonsoon.netcdfdata import NetcdfData
+from wnpmonsoon.ncdata import NCdata
 from numpy.testing import assert_almost_equal
 from netCDF4 import num2date
 import netCDF4 as nc
@@ -29,23 +29,23 @@ def direct_vas_cnrmcm5(path_vas_cnrmcm5):
 @pytest.fixture
 def pr_access10(path_pr_access10):
     """Daily pr ACCESS1-0 rcp85"""
-    return NetcdfData(path_pr_access10)
+    return NCdata(path_pr_access10)
 
 
 @pytest.fixture
 def uas_cmcccm(path_uas_cmcccm):
     """Daily uas CMCC-CM rcp85"""
-    return NetcdfData(path_uas_cmcccm)
+    return NCdata(path_uas_cmcccm)
 
 
 @pytest.fixture
 def vas_cnrmcm5(path_vas_cnrmcm5):
     """Daily vas CNRM-CM5 rcp85"""
-    return NetcdfData(path_vas_cnrmcm5)
+    return NCdata(path_vas_cnrmcm5)
 
 
 def test_init_pr_access10(path_pr_access10, direct_pr_access10):
-    nc_obj = NetcdfData(path_pr_access10)
+    nc_obj = NCdata(path_pr_access10)
     assert nc_obj.var_name == 'pr'
     assert nc_obj.model_id == 'ACCESS1-0'
     assert nc_obj.var_units == 'kg m-2 s-1'
@@ -58,7 +58,7 @@ def test_init_pr_access10(path_pr_access10, direct_pr_access10):
 
 
 def test_init_uas_cmcccm(path_uas_cmcccm, direct_uas_cmcccm):
-    nc_obj = NetcdfData(path_uas_cmcccm)
+    nc_obj = NCdata(path_uas_cmcccm)
     assert nc_obj.var_name == 'uas'
     assert nc_obj.model_id == 'CMCC-CM'
     assert nc_obj.var_units == 'm s-1'
@@ -71,7 +71,7 @@ def test_init_uas_cmcccm(path_uas_cmcccm, direct_uas_cmcccm):
 
 
 def test_init_vas_cnrmcm5(path_vas_cnrmcm5, direct_vas_cnrmcm5):
-    nc_obj = NetcdfData(path_vas_cnrmcm5)
+    nc_obj = NCdata(path_vas_cnrmcm5)
     assert nc_obj.var_name == 'vas'
     assert nc_obj.model_id == 'CNRM-CM5'
     assert nc_obj.var_units == 'm s-1'
@@ -97,7 +97,7 @@ def test_pr_units_input_error(uas_cmcccm):
 def test_write_no_overwrites(pr_access10):
     save_location = tempfile.NamedTemporaryFile().name + '.nc'
     pr_access10.write(save_location)
-    NetcdfData(save_location)
+    NCdata(save_location)
     os.remove(save_location)
 
 
@@ -107,7 +107,7 @@ def test_write_overwrite_time(pr_access10):
     fake_time_units = 'epochs'
     fake_calendar = 'corgi'
     pr_access10.write(save_location, time_var=fake_time_data, time_units=fake_time_units, calendar=fake_calendar)
-    overwritten_file = NetcdfData(save_location)
+    overwritten_file = NCdata(save_location)
     os.remove(save_location)
     assert_almost_equal(overwritten_file.time, fake_time_data)
     assert overwritten_file.model_id == pr_access10.model_id
@@ -120,7 +120,7 @@ def test_write_overwrite_coords(pr_access10):
     fake_lats = pr_access10.lats + 10
     fake_lons = pr_access10.lons + 10
     pr_access10.write(save_location, lats=fake_lats, lons=fake_lons)
-    overwritten_file = NetcdfData(save_location)
+    overwritten_file = NCdata(save_location)
     os.remove(save_location)
     assert overwritten_file.model_id == pr_access10.model_id
     assert_almost_equal(overwritten_file.lats, fake_lats)
@@ -133,7 +133,7 @@ def test_write_overwrite_variable(pr_access10):
     fake_var_unit = 'slugs'
     fake_var_name = 'force'
     pr_access10.write(save_location, variable=fake_var_data, var_units=fake_var_unit, var_name=fake_var_name)
-    overwritten_file = NetcdfData(save_location)
+    overwritten_file = NCdata(save_location)
     os.remove(save_location)
     assert_almost_equal(overwritten_file.variable, fake_var_data)
     assert overwritten_file.var_units == fake_var_unit

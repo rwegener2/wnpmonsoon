@@ -1,9 +1,9 @@
 import netCDF4 as nc
 import os
 from wnpmonsoon.netcdf import NetCDFWriter
-from wnpmonsoon.netcdfdata import NetcdfData
+from wnpmonsoon.ncdata import NCdata
 
-model_precip = NetcdfData(file_, 'pr')
+model_precip = NCdata(file_, 'pr')
 model_precip.pr_unit_conversion()
 model_precip.write(output_filename)
 

@@ -1,4 +1,4 @@
-from wnpmonsoon.netcdfdata import NetcdfData
+from wnpmonsoon.ncdata import NCdata
 import numpy as np
 
 
@@ -28,10 +28,10 @@ def wind_direction(uas_file, vas_file, save_location):
     :param uas_file: filepath of 'uas'
     :param vas_file: filepath of 'vas'
     :param save_location: where to save output
-    :return: a NetcdfData object wind direction
+    :return: a NCdata object wind direction
     """
-    uas = NetcdfData(uas_file)
-    vas = NetcdfData(vas_file)
+    uas = NCdata(uas_file)
+    vas = NCdata(vas_file)
     wind_dir_data = degfromnorth(uas.variable, vas.variable)
     uas.write(save_location, variable=wind_dir_data, var_name='wdir', var_units='degrees clockwise from north')
-    return NetcdfData(save_location)
+    return NCdata(save_location)

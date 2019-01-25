@@ -4,7 +4,7 @@ import netCDF4 as nc
 import numpy as np
 
 
-class NetcdfData(object):
+class NCdata(object):
     def __init__(self, file_):
         with nc.Dataset(file_, 'r+') as dataset:
             print('ncattrs are ', dataset.ncattrs())
@@ -17,6 +17,9 @@ class NetcdfData(object):
             self.calendar = dataset.variables['time'].calendar
             self.time_units = dataset.variables['time'].units
             self.model_id = dataset.getncattr('model_id')
+            self.globalvars = {}
+            for key in dataset.ncattrs():
+                self.globalvars[key] = dataset.getncattr(key)
             # TODO other global attributes as a dict
 
     def pr_unit_conversion(self):
@@ -47,13 +50,14 @@ class NetcdfData(object):
         # TODO custom global attribute column that tracks this
 
     def filename_generator(self):
-        # """
-        # returns a string with an ideal filename for the file
-        # :return:
-        # """
-        # TODO os.path.join with different split character?
-        # return os.path.join(self.var_name, <t_res>, self.model_id, rcp85, r1i1p1, custom modifiers (i.e. jjaso))
-        raise NotImplementedError
+        """
+        returns a string with an ideal filename for the file
+        :return:
+        """
+        return "_".join([self.var_name, self.globalvars['frequency'], self.model_id,
+                         self.globalvars['parent_experiment_id'], self.globalvars['experiment_id'],
+                         self.globalvaras['parent_experiment_rip']])
+        # TODO append , custom modifiers (i.e. jjaso)
 
     def write(self, output_filename, time_var=None, time_units=None, lats=None, lons=None, var_name=None, variable=None,
               var_units=None, calendar=None):
@@ -84,9 +88,9 @@ class NetcdfData(object):
             variable = self.variable
         writer = NetCDFWriter(output_filename)
         # TODO for global attribute setter: extract string of variable name
+        for key, value in self.globalvars:
+            writer.set_global_attributes(key=value)  # TODO that won't work
         writer.set_global_attributes(model_id=self.model_id)
         writer.create_time_variable("time", time_var, units=time_units, calendar=calendar)
         writer.create_grid_variables(lats, lons)
         writer.create_data_variable(var_name, ("time", "lat", "lon"), variable, units=var_units)
-
-

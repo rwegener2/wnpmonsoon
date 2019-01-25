@@ -1,15 +1,15 @@
-from wnpmonsoon.netcdfdata import NetcdfData
+from wnpmonsoon.ncdata import NCdata
 import numpy as np
 
-uas = NetcdfData(file_, 'uas')
-vas = NetcdfData(file_, 'uas')
+uas = NCdata(file_, 'uas')
+vas = NCdata(file_, 'uas')
 
 wind_sp = np.sqrt(np.square(uas.variable)+np.square(vas.variable))
 
 # TODO decide if this is a good idea / if there is a better way to do this
 # Inheriting from another object?
 variable = 'ws'
-ws = NetcdfData('notrealfile', variable, create_new=True)
+ws = NCdata('notrealfile', variable, create_new=True)
 ws.var_name = variable
 ws.model = uas.model_id
 ws.var_units = uas.var_units
