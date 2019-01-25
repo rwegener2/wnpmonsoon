@@ -1,26 +1,22 @@
 from wnpmonsoon.netcdf import NetCDFWriter
 from netCDF4 import num2date, date2num
-import netCDF4 as nc
 import numpy as np
 
 
 class NCdata(object):
-    def __init__(self, file_):
-        with nc.Dataset(file_, 'r+') as dataset:
-            print('ncattrs are ', dataset.ncattrs())
-            self.var_name = list(dataset.variables.keys())[-1]
-            self.var_units = dataset.variables[self.var_name].units
-            self.variable = np.asarray(dataset.variables[self.var_name][:])
-            self.lats = np.asarray(dataset.variables['lat'])
-            self.lons = np.asarray(dataset.variables['lon'])
-            self.time = np.asarray(dataset.variables['time'])
-            self.calendar = dataset.variables['time'].calendar
-            self.time_units = dataset.variables['time'].units
-            self.model_id = dataset.getncattr('model_id')
-            self.globalvars = {}
-            for key in dataset.ncattrs():
-                self.globalvars[key] = dataset.getncattr(key)
-            # TODO other global attributes as a dict
+    def __init__(self, dataset_reader):
+        self.var_name = list(dataset_reader.variables.keys())[-1]
+        self.var_units = dataset_reader.variables[self.var_name].units
+        self.variable = np.asarray(dataset_reader.variables[self.var_name][:])
+        self.lats = np.asarray(dataset_reader.variables['lat'])
+        self.lons = np.asarray(dataset_reader.variables['lon'])
+        self.time = np.asarray(dataset_reader.variables['time'])
+        self.calendar = dataset_reader.variables['time'].calendar
+        self.time_units = dataset_reader.variables['time'].units
+        self.model_id = dataset_reader.getncattr('model_id')
+        self.globalattrs = {}
+        for key in dataset_reader.ncattrs():
+            self.globalattrs[key] = dataset_reader.getncattr(key)
 
     def pr_unit_conversion(self):
         """
@@ -54,9 +50,9 @@ class NCdata(object):
         returns a string with an ideal filename for the file
         :return:
         """
-        return "_".join([self.var_name, self.globalvars['frequency'], self.model_id,
-                         self.globalvars['parent_experiment_id'], self.globalvars['experiment_id'],
-                         self.globalvaras['parent_experiment_rip']])
+        return "_".join([self.var_name, self.globalattrs['frequency'], self.model_id,
+                         self.globalattrs['parent_experiment_id'], self.globalattrs['experiment_id'],
+                         self.globalattrs['parent_experiment_rip']])
         # TODO append , custom modifiers (i.e. jjaso)
 
     def write(self, output_filename, time_var=None, time_units=None, lats=None, lons=None, var_name=None, variable=None,
@@ -87,9 +83,8 @@ class NCdata(object):
         except AttributeError:
             variable = self.variable
         writer = NetCDFWriter(output_filename)
-        # TODO for global attribute setter: extract string of variable name
-        for key, value in self.globalvars:
-            writer.set_global_attributes(key=value)  # TODO that won't work
+        # for key, value in self.globalattrs.items():
+        writer.set_global_attributes(**self.globalattrs)
         writer.set_global_attributes(model_id=self.model_id)
         writer.create_time_variable("time", time_var, units=time_units, calendar=calendar)
         writer.create_grid_variables(lats, lons)
