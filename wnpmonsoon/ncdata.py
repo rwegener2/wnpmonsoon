@@ -1,10 +1,13 @@
 from wnpmonsoon.netcdf import NetCDFWriter
 from netCDF4 import num2date, date2num
+import netCDF4
 import numpy as np
 
 
 class NCdata(object):
     def __init__(self, dataset_reader):
+        if not isinstance(dataset_reader, netCDF4._netCDF4.Dataset):
+            raise TypeError('Input to NCData should be a netCDF4._netCDF4.Dataset object')
         self.var_name = list(dataset_reader.variables.keys())[-1]
         self.var_units = dataset_reader.variables[self.var_name].units
         self.variable = np.asarray(dataset_reader.variables[self.var_name][:])

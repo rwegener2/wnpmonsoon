@@ -91,6 +91,11 @@ def test_init_vas_cnrmcm5(path_vas_cnrmcm5, direct_vas_cnrmcm5):
     assert nc_obj.time_units == 'days since 2006-01-01 00:00:00'
 
 
+def test_init_type_error(path_pr_access10):
+    with pytest.raises(TypeError):
+        NCdata(path_pr_access10)
+
+
 def test_pr_unit_conversion(pr_access10, direct_pr_access10):
     pr_access10.pr_unit_conversion()
     assert pr_access10.var_units == 'mm hr-1'
