@@ -27,6 +27,20 @@ def path_vas_cmcccm(data_dir):
 
 
 @pytest.fixture(scope='session')
+def path_uas_cnrmcm5(data_dir):
+    """Path to daily uas CNRM-CM5 rcp85"""
+    return os.path.join(data_dir, 'CNRM-CM5', 'uas_day_CNRM-CM5_rcp85_r1i1p1_1year_spatial_clip.nc')
+
+
+@pytest.fixture(scope='session')
 def path_vas_cnrmcm5(data_dir):
     """Path to daily vas CNRM-CM5 rcp85"""
     return os.path.join(data_dir, 'CNRM-CM5', 'vas_day_CNRM-CM5_rcp85_r1i1p1_1year_spatial_clip.nc')
+
+
+@pytest.fixture(scope='session')
+def path_vas_cnrmcm5_modified_lats(data_dir):
+    """Path to daily vas CNRM-CM5 rcp85"""
+    print(os.path.join(data_dir, 'vas_day_CNRM-CM5_rcp85_r1i1p1_modified_coords.nc'))
+    print(os.path.exists(os.path.join(data_dir, 'vas_day_CNRM-CM5_rcp85_r1i1p1_modified_coords.nc')))
+    return os.path.join(data_dir, 'vas_day_CNRM-CM5_rcp85_r1i1p1_modified_coords.nc')

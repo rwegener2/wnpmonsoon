@@ -1,4 +1,4 @@
-from wnpmonsoon.wind_direction import olddegfromnorth, degfromnorth
+from wnpmonsoon.tools import olddegfromnorth, degfromnorth
 import numpy as np
 
 # Manually computed test points

@@ -1,4 +1,5 @@
 from wnpmonsoon.ncdata import NCdata
+from wnpmonsoon import tools
 from numpy.testing import assert_almost_equal
 from netCDF4 import num2date
 import netCDF4 as nc
@@ -18,6 +19,12 @@ def direct_pr_access10(path_pr_access10):
 def direct_uas_cmcccm(path_uas_cmcccm):
     """Daily uas CMCC-CM rcp85 loaded directly with netCDF4"""
     return nc.Dataset(path_uas_cmcccm)
+
+
+@pytest.fixture
+def direct_uas_cnrmcm5(path_uas_cnrmcm5):
+    """Daily uas CNRM-CM5 rcp85 loaded directly with netCDF4"""
+    return nc.Dataset(path_uas_cnrmcm5)
 
 
 @pytest.fixture
@@ -106,6 +113,49 @@ def test_pr_unit_conversion(path_pr_access10, direct_pr_access10):
 def test_pr_units_input_error(path_uas_cmcccm):
     with pytest.raises(TypeError):
         NCdata.pr_rate_from_flux(path_uas_cmcccm)
+
+
+def test_wind_dir_from_comp_uas_type_error(path_pr_access10, path_vas_cmcccm):
+    with nc.Dataset(path_pr_access10, 'r') as uas_reader, \
+         nc.Dataset(path_vas_cmcccm, 'r') as vas_reader:
+        with pytest.raises(TypeError):
+            NCdata.wind_dir_from_components(uas_reader, vas_reader)
+
+
+def test_wind_dir_from_comp_vas_type_error(path_uas_cmcccm, path_pr_access10):
+    with nc.Dataset(path_uas_cmcccm, 'r') as uas_reader, \
+         nc.Dataset(path_pr_access10, 'r') as vas_reader:
+        with pytest.raises(TypeError):
+            NCdata.wind_dir_from_components(uas_reader, vas_reader)
+
+
+def test_wind_dir_from_comp_coord_misaligned_error(path_uas_cnrmcm5, path_vas_cnrmcm5_modified_lats):
+    with nc.Dataset(path_uas_cnrmcm5, 'r') as uas_reader, \
+         nc.Dataset(path_vas_cnrmcm5_modified_lats, 'r') as vas_reader:
+        with pytest.raises(TypeError):
+            NCdata.wind_dir_from_components(uas_reader, vas_reader)
+
+
+def test_wind_dir_from_comp_model_misaligned_error(path_uas_cmcccm, path_vas_cnrmcm5):
+    with nc.Dataset(path_uas_cmcccm, 'r') as uas_reader, \
+         nc.Dataset(path_vas_cnrmcm5, 'r') as vas_reader:
+        with pytest.raises(TypeError):
+            NCdata.wind_dir_from_components(uas_reader, vas_reader)
+
+
+def test_wind_dir_from_components(path_uas_cnrmcm5, path_vas_cnrmcm5, direct_uas_cnrmcm5, direct_vas_cnrmcm5):
+    with nc.Dataset(path_uas_cnrmcm5, 'r') as uas_reader, \
+         nc.Dataset(path_vas_cnrmcm5, 'r') as vas_reader:
+        wind_dir = NCdata.wind_dir_from_components(uas_reader, vas_reader)
+    wind_dir_truth = tools.degfromnorth(np.asarray(direct_uas_cnrmcm5.variables['uas'][:]),
+                                        np.asarray(direct_vas_cnrmcm5.variables['vas'][:]))
+    assert wind_dir.var_name == 'wdir'
+    assert wind_dir.var_units == 'degrees clockwise from north'
+    assert_almost_equal(wind_dir.variable, wind_dir_truth)
+    assert wind_dir.model_id == 'CNRM-CM5'
+    assert wind_dir.globalattrs['frequency'] == 'day'
+    assert wind_dir.globalattrs['parent_experiment_rip'] == 'r1i1p1'
+    assert wind_dir.globalattrs['creation_date_uas'] == '2011-05-10T10:54:55Z'
 
 
 def test_write_no_overwrites(pr_access10):

@@ -1,4 +1,5 @@
 from wnpmonsoon.netcdf import NetCDFWriter
+from wnpmonsoon import tools
 from netCDF4 import num2date, date2num
 import netCDF4
 import numpy as np
@@ -23,6 +24,13 @@ class NCdata(object):
 
     @classmethod
     def pr_rate_from_flux(cls, pr_rate_reader):
+        """
+        Create a NCdata object for precipitation rate using an input dataset_reader from precipitation rate
+        :param pr_rate_reader: netCDF4 Dataset object for precipitation flux
+        :return: NCdata object for precipitation rate
+        """
+        if not isinstance(pr_rate_reader, netCDF4._netCDF4.Dataset):
+            raise TypeError('Input to NCData should be a netCDF4._netCDF4.Dataset object')
         pr_flux = NCdata(pr_rate_reader)
         if pr_flux.var_name != 'pr' or pr_flux.var_units != 'kg m-2 s-1':
             raise TypeError("Filepath used to create precipitation rate must be a flux nc file, with a variable name "
@@ -31,18 +39,51 @@ class NCdata(object):
         pr_flux.var_units = "mm hr-1"
         return pr_flux
 
-    # @classmethod
-    # def wind_dir_from_components(cls, uas=uas_rate_reader, vas=vas_rate_reader):
-    #     pass
+    @classmethod
+    def wind_dir_from_components(cls, uas_reader, vas_reader):
+        """
+        Create a NCdata object for wind direction based on uas and vas.  For global attributes, the attributes that the
+        two datasets share will be input into the wind direction object exactly as they were.  Those attributes that
+        differ (usually history, creation_date, etc.) will be post-pended with `_uas` or `_vas` and added to the global
+        attributes as such
+        :param uas_reader: netCDF4 Dataset object for uas
+        :param vas_reader: netCDF Dataset object for vas
+        :return: NCdata object for wind direction with appropriately updated data and units
+        """
+        if not all(isinstance(reader, netCDF4._netCDF4.Dataset) for reader in [uas_reader, vas_reader]):
+            raise TypeError('Input to NCData should be a netCDF4._netCDF4.Dataset object')
 
-    # def pr_unit_conversion(self):
-    #     """
-    #     Convert precipitation flux (units kg / m^2 / s) to precipitation rate (units mm/day)
-    #     """
-    #     if self.var_name != 'pr' and self.var_units != 'kg m-2 s-1':
-    #         raise TypeError("Cannot run this method on a dataset that isn't precipitation flux")
-    #     self.variable = self.variable*86400
-    #     self.var_units = "mm hr-1"
+        # Ensure inputs are of proper type
+        if 'uas' not in uas_reader.variables.keys():
+            raise TypeError("uas_reader must have a variable 'uas'")
+        if 'vas' not in vas_reader.variables.keys():
+            raise TypeError("vas_reader must have a variable 'vas'")
+
+        # Ensure uas and vas align and can be converted to wind direction
+        uas = NCdata(uas_reader)
+        vas = NCdata(vas_reader)
+        shared_vars = [item for item in list(uas.__dict__.keys()) if item not in ['var_name', 'variable', 'globalattrs']]
+        wind_dir = cls.__new__(cls)
+        for var in shared_vars:
+            if (np.asarray(getattr(uas, var) != getattr(vas, var))).all():
+                raise TypeError('uas and vas are not aligned (do not have the same value) for global attribute: ', var)
+            setattr(wind_dir, var, getattr(uas, var))
+
+        # Created combined global attributes
+        wdir_globalattrs = {}
+        for key, value in uas.globalattrs.items():
+            if value == vas.globalattrs[key] == value:
+                wdir_globalattrs[key] = value
+            else:
+                wdir_globalattrs[key + '_uas'] = value
+                wdir_globalattrs[key + '_vas'] = vas.globalattrs[key]
+
+        # Set new attributes
+        wind_dir.var_name = 'wdir'
+        wind_dir.var_units = 'degrees clockwise from north'
+        wind_dir.globalattrs = wdir_globalattrs
+        wind_dir.variable = tools.degfromnorth(uas=uas.variable, vas=vas.variable)
+        return wind_dir
 
     def jjaso_subset(self):
         """
