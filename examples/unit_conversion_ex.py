@@ -37,6 +37,9 @@ print('variable units:', precip_obj.var_units)
 
 
 # Other random testing
+with nc.Dataset(precip_test_file_lin, 'r') as src:
+    print(src.variables['pr'].units)
+    print(src.variables.keys())
 save_at = '/home/rwegener/repos/wnpmonsoon/tests/delete-it.nc'
 precip_obj.write(save_at)
 

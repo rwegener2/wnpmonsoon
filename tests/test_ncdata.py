@@ -96,15 +96,16 @@ def test_init_type_error(path_pr_access10):
         NCdata(path_pr_access10)
 
 
-def test_pr_unit_conversion(pr_access10, direct_pr_access10):
-    pr_access10.pr_unit_conversion()
-    assert pr_access10.var_units == 'mm hr-1'
-    assert_almost_equal(pr_access10.variable, np.asarray(direct_pr_access10.variables['pr'])*86400, decimal=2)
+def test_pr_unit_conversion(path_pr_access10, direct_pr_access10):
+    with nc.Dataset(path_pr_access10) as dataset_reader:
+        pr = NCdata.pr_rate_from_flux(dataset_reader)
+    assert pr.var_units == 'mm hr-1'
+    assert_almost_equal(pr.variable, np.asarray(direct_pr_access10.variables['pr'])*86400, decimal=2)
 
 
-def test_pr_units_input_error(uas_cmcccm):
+def test_pr_units_input_error(path_uas_cmcccm):
     with pytest.raises(TypeError):
-        uas_cmcccm.pr_unit_conversion()
+        NCdata.pr_rate_from_flux(path_uas_cmcccm)
 
 
 def test_write_no_overwrites(pr_access10):

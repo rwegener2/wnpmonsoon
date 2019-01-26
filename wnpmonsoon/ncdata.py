@@ -21,14 +21,28 @@ class NCdata(object):
         for key in dataset_reader.ncattrs():
             self.globalattrs[key] = dataset_reader.getncattr(key)
 
-    def pr_unit_conversion(self):
-        """
-        Convert precipitation flux (units kg / m^2 / s) to precipitation rate (units mm/day)
-        """
-        if self.var_name != 'pr' and self.var_units != 'kg m-2 s-1':
-            raise TypeError("Cannot run this method on a dataset that isn't precipitation flux")
-        self.variable = self.variable*86400
-        self.var_units = "mm hr-1"
+    @classmethod
+    def pr_rate_from_flux(cls, pr_rate_reader):
+        pr_flux = NCdata(pr_rate_reader)
+        if pr_flux.var_name != 'pr' or pr_flux.var_units != 'kg m-2 s-1':
+            raise TypeError("Filepath used to create precipitation rate must be a flux nc file, with a variable name "
+                            "of 'pr' and units of 'kg m-2 s-1")
+        pr_flux.variable = pr_flux.variable * 86400
+        pr_flux.var_units = "mm hr-1"
+        return pr_flux
+
+    # @classmethod
+    # def wind_dir_from_components(cls, uas=uas_rate_reader, vas=vas_rate_reader):
+    #     pass
+
+    # def pr_unit_conversion(self):
+    #     """
+    #     Convert precipitation flux (units kg / m^2 / s) to precipitation rate (units mm/day)
+    #     """
+    #     if self.var_name != 'pr' and self.var_units != 'kg m-2 s-1':
+    #         raise TypeError("Cannot run this method on a dataset that isn't precipitation flux")
+    #     self.variable = self.variable*86400
+    #     self.var_units = "mm hr-1"
 
     def jjaso_subset(self):
         """
@@ -86,7 +100,6 @@ class NCdata(object):
         except AttributeError:
             variable = self.variable
         writer = NetCDFWriter(output_filename)
-        # for key, value in self.globalattrs.items():
         writer.set_global_attributes(**self.globalattrs)
         writer.set_global_attributes(model_id=self.model_id)
         writer.create_time_variable("time", time_var, units=time_units, calendar=calendar)
