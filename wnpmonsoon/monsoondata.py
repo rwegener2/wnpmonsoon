@@ -1,4 +1,5 @@
 from wnpmonsoon.ncdata import NCdata
+from wnpmonsoon import tools
 from rasterio.warp import reproject
 from rasterio.enums import Resampling
 from itertools import groupby
@@ -78,30 +79,34 @@ class MonsoonData(NCdata):
         NCmonsoon.monsoon_criteria = criteria['summary_dict']
         return NCmonsoon
 
-    # TODO move to tools?
     @staticmethod
-    def affine_from_coords(lats, lons):
-
-        return affine
-
-    def align_grids(self, ncdata1, ncdata2):
+    def align_grids(ncdata1, ncdata2):
         # Check which dataset is larger
-        # This system is going to have to change so that we can properly return the output
-        if ncdata1.variable.size > ncdata2.size:
+        data_track = {}
+        if ncdata1.variable.size > ncdata2.variable.size:
             modifying_nc = ncdata2
             template = ncdata1
+            data_track.update({'modifying': ncdata2, 'template': ncdata1})
         else:
             modifying_nc = ncdata1
             template = ncdata2
+            data_track.update({'modifying': ncdata1, 'template': ncdata2})
 
-        transformed = np.zeros(template.shape)
+        # Resample the data
+        transformed = np.zeros(template.variable.shape)
+        print('modifying shape ', modifying_nc.variable.shape)
+        print('template shape ', template.variable.shape)
         reproject(
-            modifying_nc, transformed,
-            src_transform=self.affine_from_coords(),
-            dst_transform=self.affine_from_coords(),
-            src_crs='EPSG:4326',  # TODO confirm that all CMIP5 data MUST be in EPSG:4326
-            dst_crs='EPSG:4326',
+            modifying_nc.variable, transformed,
+            src_transform=tools.affine_from_coords(template.lats, template.lons),
+            dst_transform=tools.affine_from_coords(modifying_nc.lats, modifying_nc.lons),
+            src_crs={'init': 'EPSG:4326'},  # TODO confirm that all CMIP5 data MUST be in EPSG:4326
+            dst_crs={'init': 'EPSG:4326'},
             resampling=Resampling.nearest)
+        print('transformed shape ', transformed.shape)
+        print('template sape ', template.variable.shape)
+        modifying_nc.variable = transformed
+        print('modfying shape ', modifying_nc.variable.shape)
         return data1, data2, lats, lons
 
     def decadal_rollup(self, average=False, write=None):

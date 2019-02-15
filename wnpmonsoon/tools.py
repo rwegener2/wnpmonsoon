@@ -1,4 +1,5 @@
 import numpy as np
+from affine import Affine
 
 
 def degfromnorth(uas, vas):
@@ -19,3 +20,13 @@ def degfromnorth(uas, vas):
     deg_west = np.degrees(np.arctan2(vas_nans, uas_nans))
     # Return the result as the degrees clockwise from north
     return (-deg_west + 270) % 360
+
+
+def affine_from_coords(lats, lons):
+    if len(set(np.diff(lats))) > 1:
+        raise TypeError('Inconsistent lats.  See input data')
+    height = np.diff(lats)[0]
+    if len(set(np.diff(lons))) > 1:
+        raise TypeError('Inconsistent lons.  See input data')
+    width = np.diff(lons)[0]
+    return Affine(width, 0, lons.min(), 0, -height, lats.max())

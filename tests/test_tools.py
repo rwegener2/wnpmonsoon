@@ -58,3 +58,10 @@ def test_all_as_array():
     uas = np.array([1, 1, 0, -np.sqrt(3), -1, np.sqrt(3), -1, -np.sqrt(3), -1, 1, -1, np.sqrt(3)])
     vas = np.array([1, np.sqrt(3), 1, 1, -1, -1, 0, -1, np.sqrt(3), -1, 1, -1])
     assert (degfromnorth(uas, vas) == np.array([225, 210, 180, 120, 45, 300, 90, 60, 150, 315, 135, 300])).all()
+
+
+# TODO fully flesh out these tests
+def test_affine_from_coords():
+    file_ = r"ACCESS1-0/uas_day_ACCESS1-0_rcp85_r1i1p1_1year_spatial_clip.nc"
+    # wd generated from those uas/vas gets lats/lons with affine of
+    affine = (1.875, 0, 120.9375, 0, -1.25, 39.375)
