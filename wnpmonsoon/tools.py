@@ -1,4 +1,3 @@
-# from wnpmonsoon.ncdata import NCdata
 import numpy as np
 
 
@@ -20,17 +19,3 @@ def degfromnorth(uas, vas):
     deg_west = np.degrees(np.arctan2(vas_nans, uas_nans))
     # Return the result as the degrees clockwise from north
     return (-deg_west + 270) % 360
-
-
-# def wind_direction(uas_file, vas_file, save_location):
-#     """
-#     :param uas_file: filepath of 'uas'
-#     :param vas_file: filepath of 'vas'
-#     :param save_location: where to save output
-#     :return: a NCdata object wind direction
-#     """
-#     uas = NCdata(uas_file)
-#     vas = NCdata(vas_file)
-#     wind_dir_data = degfromnorth(uas.variable, vas.variable)
-#     uas.write(save_location, variable=wind_dir_data, var_name='wdir', var_units='degrees clockwise from north')
-#     return NCdata(save_location)
