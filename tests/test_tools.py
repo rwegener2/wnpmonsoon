@@ -65,3 +65,8 @@ def test_affine_from_coords():
     file_ = r"ACCESS1-0/uas_day_ACCESS1-0_rcp85_r1i1p1_1year_spatial_clip.nc"
     # wd generated from those uas/vas gets lats/lons with affine of
     affine = (1.875, 0, 120.9375, 0, -1.25, 39.375)
+
+def test_affine_from_coords():
+    file_ = r"ACCESS1-0/pr_day_ACCESS1-0_rcp85_r1i1p1_1year_spatial_clip.nc"
+    # pr generated from those pr gets lats/lons with affine of
+    affine = (1.875, 0, 120, 0, -1.25, 40)

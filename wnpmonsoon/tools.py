@@ -30,3 +30,14 @@ def affine_from_coords(lats, lons):
         raise TypeError('Inconsistent lons.  See input data')
     width = np.diff(lons)[0]
     return Affine(width, 0, lons.min(), 0, -height, lats.max())
+
+
+def coords_from_affine(affine, height, width):
+    # (1.88, 0.0, 120.94, 0.0, -1.25, 39.38)
+    if not isinstance(affine, tuple):
+        affine = Affine(*affine)
+    if not isinstance(affine, Affine):
+        raise TypeError('input must be an affine object or a tuple')
+    lats = np.arange(affine.f, affine.f + height*affine.e, affine.e)
+    lons = np.arange(affine.c, affine.c + width*affine.a, affine.a)
+    return lats, lons

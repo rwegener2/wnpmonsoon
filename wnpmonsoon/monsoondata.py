@@ -23,7 +23,6 @@ def criteria_generator(pr_min=-np.inf, pr_max=np.inf, wd_min=-np.inf, wd_max=np.
 class MonsoonData(NCdata):
     def __init__(self, dataset_reader):
         NCdata.__init__(self, dataset_reader)
-        self.monsoon_criteria = {}
 
     @classmethod
     def compute(cls, precip_rate, wind_direction, criteria):
@@ -69,14 +68,20 @@ class MonsoonData(NCdata):
 
         # Created combined global attributes
         monsoon_globalattrs = {}
-        for key, value in pr.globalattrs.items():
-            if value == wind_dir.globalattrs[key]:
-                monsoon_globalattrs[key] = value
+        all_keys = list(set(list(pr.globalattrs.keys()) + list(wind_dir.globalattrs.keys())))
+        for key in all_keys:
+            if key not in pr.globalattrs.keys():
+                monsoon_globalattrs[key + '_wd'] = wind_dir.globalattrs[key]
+            elif key not in wind_dir.globalattrs.keys():
+                monsoon_globalattrs[key + '_pr'] = pr.globalattrs[key]
+            elif pr.globalattrs[key] == wind_dir.globalattrs[key]:
+                monsoon_globalattrs[key] = pr.globalattrs[key]
             else:
-                monsoon_globalattrs[key + '_pr'] = value
+                monsoon_globalattrs[key + '_pr'] = pr.globalattrs[key]
                 monsoon_globalattrs[key + '_wd'] = wind_dir.globalattrs[key]
 
-        NCmonsoon.monsoon_criteria = criteria['summary_dict']
+        monsoon_globalattrs['monsoon_criteria'] = criteria['summary_dict']  # Get this in as its own attribute somehow
+        NCmonsoon.globalattrs = monsoon_globalattrs  # could update as you go
         return NCmonsoon
 
     @staticmethod
@@ -86,28 +91,29 @@ class MonsoonData(NCdata):
         if ncdata1.variable.size > ncdata2.variable.size:
             modifying_nc = ncdata2
             template = ncdata1
-            data_track.update({'modifying': ncdata2, 'template': ncdata1})
-        else:
+            data_track.update({'ncdata1': template, 'ncdata2': modifying_nc})
+        elif ncdata2.variable.size < ncdata1.variable.size:
             modifying_nc = ncdata1
             template = ncdata2
-            data_track.update({'modifying': ncdata1, 'template': ncdata2})
+            data_track.update({'ncdata1': modifying_nc, 'ncdata2': template})
+        else:
+            return ncdata1, ncdata2, ncdata1.variable.lats, ncdata1.variable.lons
 
         # Resample the data
         transformed = np.zeros(template.variable.shape)
-        print('modifying shape ', modifying_nc.variable.shape)
-        print('template shape ', template.variable.shape)
+        src_transform = tools.affine_from_coords(modifying_nc.lats, modifying_nc.lons)
+        dst_transform = tools.affine_from_coords(template.lats, template.lons)
         reproject(
             modifying_nc.variable, transformed,
-            src_transform=tools.affine_from_coords(template.lats, template.lons),
-            dst_transform=tools.affine_from_coords(modifying_nc.lats, modifying_nc.lons),
+            src_transform=src_transform,
+            dst_transform=dst_transform,
             src_crs={'init': 'EPSG:4326'},  # TODO confirm that all CMIP5 data MUST be in EPSG:4326
             dst_crs={'init': 'EPSG:4326'},
             resampling=Resampling.nearest)
-        print('transformed shape ', transformed.shape)
-        print('template sape ', template.variable.shape)
+
+        # Update modified variable
         modifying_nc.variable = transformed
-        print('modfying shape ', modifying_nc.variable.shape)
-        return data1, data2, lats, lons
+        return data_track['ncdata1'].variable, data_track['ncdata2'].variable, template.lats, template.lons
 
     def decadal_rollup(self, average=False, write=None):
         """

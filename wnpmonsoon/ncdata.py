@@ -72,7 +72,7 @@ class NCdata(object):
         # Created combined global attributes
         wdir_globalattrs = {}
         for key, value in uas.globalattrs.items():
-            if value == vas.globalattrs[key] == value:
+            if value == vas.globalattrs[key] == value:  # TODO what in the bananas?
                 wdir_globalattrs[key] = value
             else:
                 wdir_globalattrs[key + '_uas'] = value
