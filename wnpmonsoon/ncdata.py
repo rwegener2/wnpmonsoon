@@ -22,6 +22,25 @@ class NCdata(object):
         for key in dataset_reader.ncattrs():
             self.globalattrs[key] = dataset_reader.getncattr(key)
 
+    def __copy__(self):
+        return type(self).fromexisting(self.var_name, self.var_units, self.variable, self.lats, self.lons, self.time,
+                                       self.calendar, self.time_units, self.model_id, self.globalattrs)
+
+    @classmethod
+    def fromexisting(cls, var_name, var_units, variable, lats, lons, time, calendar, time_units, model_id, globalattrs):
+        ncdata = cls.__new__(cls)
+        ncdata.var_name = var_name
+        ncdata.var_units = var_units
+        ncdata.variable = variable
+        ncdata.lats = lats
+        ncdata.lons = lons
+        ncdata.time = time
+        ncdata.calendar = calendar
+        ncdata.time_units = time_units
+        ncdata.model_id = model_id
+        ncdata.globalattrs = globalattrs
+        return ncdata
+
     @classmethod
     def pr_rate_from_flux(cls, pr_rate_reader):
         """
@@ -72,7 +91,7 @@ class NCdata(object):
         # Created combined global attributes
         wdir_globalattrs = {}
         for key, value in uas.globalattrs.items():
-            if value == vas.globalattrs[key] == value:  # TODO what in the bananas?
+            if value == vas.globalattrs[key] == value:
                 wdir_globalattrs[key] = value
             else:
                 wdir_globalattrs[key + '_uas'] = value
@@ -101,7 +120,6 @@ class NCdata(object):
         # Reset new variables
         self.variable = np.delete(self.variable, jjaso_indices, axis=0)
         self.time = date2num(jjaso_dates, units=self.time_units, calendar=self.calendar)
-        # TODO custom global attribute column that tracks this
 
     def filename_generator(self):
         """
@@ -111,7 +129,6 @@ class NCdata(object):
         return "_".join([self.var_name, self.globalattrs['frequency'], self.model_id,
                          self.globalattrs['parent_experiment_id'], self.globalattrs['experiment_id'],
                          self.globalattrs['parent_experiment_rip']])
-        # TODO append , custom modifiers (i.e. jjaso)
 
     def write(self, output_filename, time_var=None, time_units=None, lats=None, lons=None, var_name=None, variable=None,
               var_units=None, calendar=None):

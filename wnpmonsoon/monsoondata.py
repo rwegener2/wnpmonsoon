@@ -80,24 +80,24 @@ class MonsoonData(NCdata):
                 monsoon_globalattrs[key + '_pr'] = pr.globalattrs[key]
                 monsoon_globalattrs[key + '_wd'] = wind_dir.globalattrs[key]
 
-        monsoon_globalattrs['monsoon_criteria'] = criteria['summary_dict']  # Get this in as its own attribute somehow
-        NCmonsoon.globalattrs = monsoon_globalattrs  # could update as you go
+        monsoon_globalattrs['monsoon_criteria'] = criteria['summary_dict']
+        NCmonsoon.globalattrs = monsoon_globalattrs
         return NCmonsoon
 
     @staticmethod
     def align_grids(ncdata1, ncdata2):
-        # Check which dataset is larger
         data_track = {}
+        # TODO checking size here isn't ideal -- how to check that ???
         if ncdata1.variable.size > ncdata2.variable.size:
-            modifying_nc = ncdata2
-            template = ncdata1
+            modifying_nc = ncdata2.__copy__()
+            template = ncdata1.__copy__()
             data_track.update({'ncdata1': template, 'ncdata2': modifying_nc})
         elif ncdata2.variable.size < ncdata1.variable.size:
-            modifying_nc = ncdata1
-            template = ncdata2
+            modifying_nc = ncdata1.__copy__()
+            template = ncdata2.__copy__()
             data_track.update({'ncdata1': modifying_nc, 'ncdata2': template})
         else:
-            return ncdata1, ncdata2, ncdata1.variable.lats, ncdata1.variable.lons
+            return ncdata1, ncdata2, ncdata1.lats, ncdata1.lons
 
         # Resample the data
         transformed = np.zeros(template.variable.shape)
@@ -107,9 +107,9 @@ class MonsoonData(NCdata):
             modifying_nc.variable, transformed,
             src_transform=src_transform,
             dst_transform=dst_transform,
-            src_crs={'init': 'EPSG:4326'},  # TODO confirm that all CMIP5 data MUST be in EPSG:4326
+            src_crs={'init': 'EPSG:4326'},
             dst_crs={'init': 'EPSG:4326'},
-            resampling=Resampling.nearest)
+            resampling=Resampling.mode)
 
         # Update modified variable
         modifying_nc.variable = transformed
