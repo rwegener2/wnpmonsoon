@@ -19,6 +19,19 @@ def wdir_ncdata_access13(path_uas_access13, path_vas_access13):
         return NCdata.wind_dir_from_components(uas_reader, vas_reader)
 
 
+@pytest.fixture
+def precip_rate_ncdata_cnrmcm5(path_pr_cnrmcm5):
+    with nc.Dataset(path_pr_cnrmcm5, 'r') as pflux_src:
+        return NCdata.pr_rate_from_flux(pflux_src)
+
+
+@pytest.fixture
+def wdir_ncdata_cnrmcm5(path_uas_cnrmcm5, path_vas_cnrmcm5):
+    with nc.Dataset(path_uas_cnrmcm5, 'r') as uas_reader, \
+         nc.Dataset(path_vas_cnrmcm5, 'r') as vas_reader:
+        return NCdata.wind_dir_from_components(uas_reader, vas_reader)
+
+
 def test_aligngrids_largernc1(precip_rate_ncdata_access13, wdir_ncdata_access13, path_wdir_cnrmcm5_adj_coords):
     precip, wdir, lats, lons = MonsoonData.align_grids(precip_rate_ncdata_access13, wdir_ncdata_access13)
     wdir_truth = np.load(path_wdir_cnrmcm5_adj_coords)
@@ -28,13 +41,21 @@ def test_aligngrids_largernc1(precip_rate_ncdata_access13, wdir_ncdata_access13,
     assert_almost_equal(lons, precip_rate_ncdata_access13.lons)
 
 
-# def test_aligngrids_largernc2(precip_rate_ncdata_access13, wdir_ncdata_access13, path_wdir_cnrmcm5_adj_coords):
-#     wdir, precip, lats, lons = MonsoonData.align_grids(wdir_ncdata_access13, precip_rate_ncdata_access13)
-#     wdir_truth = np.load(path_wdir_cnrmcm5_adj_coords)
-#     assert_almost_equal(precip, precip_rate_ncdata_access13.variable)
-#     assert_almost_equal(wdir, wdir_truth)
-#     assert_almost_equal(lats, precip_rate_ncdata_access13.lats)
-#     assert_almost_equal(lons, precip_rate_ncdata_access13.lons)
+def test_aligngrids_largernc2(precip_rate_ncdata_access13, wdir_ncdata_access13, path_wdir_cnrmcm5_adj_coords):
+    wdir, precip, lats, lons = MonsoonData.align_grids(wdir_ncdata_access13, precip_rate_ncdata_access13)
+    wdir_truth = np.load(path_wdir_cnrmcm5_adj_coords)
+    assert_almost_equal(precip, precip_rate_ncdata_access13.variable)
+    assert_almost_equal(wdir, wdir_truth)
+    assert_almost_equal(lats, precip_rate_ncdata_access13.lats)
+    assert_almost_equal(lons, precip_rate_ncdata_access13.lons)
+
+
+def test_aligngrids_samesize(precip_rate_ncdata_cnrmcm5, wdir_ncdata_cnrmcm5):
+    wdir, precip, lats, lons = MonsoonData.align_grids(wdir_ncdata_cnrmcm5, precip_rate_ncdata_cnrmcm5)
+    assert_almost_equal(precip, precip_rate_ncdata_cnrmcm5.variable)
+    assert_almost_equal(wdir, wdir_ncdata_cnrmcm5.variable)
+    assert_almost_equal(lats, precip_rate_ncdata_cnrmcm5.lats)
+    assert_almost_equal(lons, precip_rate_ncdata_cnrmcm5.lons)
 
 
 def test_init():

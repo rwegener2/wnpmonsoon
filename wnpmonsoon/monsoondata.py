@@ -92,12 +92,12 @@ class MonsoonData(NCdata):
             modifying_nc = ncdata2.__copy__()
             template = ncdata1.__copy__()
             data_track.update({'ncdata1': template, 'ncdata2': modifying_nc})
-        elif ncdata2.variable.size < ncdata1.variable.size:
+        elif ncdata1.variable.size < ncdata2.variable.size:
             modifying_nc = ncdata1.__copy__()
             template = ncdata2.__copy__()
             data_track.update({'ncdata1': modifying_nc, 'ncdata2': template})
         else:
-            return ncdata1, ncdata2, ncdata1.lats, ncdata1.lons
+            return ncdata1.variable, ncdata2.variable, ncdata1.lats, ncdata1.lons
 
         # Resample the data
         transformed = np.zeros(template.variable.shape)
