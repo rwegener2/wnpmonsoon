@@ -2,6 +2,7 @@ import pytest
 import os
 
 
+# TODO update the descriptions of the datasets
 @pytest.fixture(scope='session')
 def data_dir():
     """Absolute file path to the directory containing test datasets."""
@@ -32,6 +33,17 @@ def path_vas_access13(data_dir):
     return os.path.join(data_dir, 'ACCESS1-3', 'vas_day_ACCESS1-3_rcp85_r1i1p1_1year_spatial_clip.nc')
 
 
+@pytest.fixture(scope='session')
+def path_pr_from_flux_access13(data_dir):
+    """Path to daily pr ACCESS1-3 rcp85"""
+    return os.path.join(data_dir, 'created', 'pr_from_flux_ACCESS1-3.nc')
+
+
+@pytest.fixture(scope='session')
+def path_wdir_access13(data_dir):
+    """Path to daily pr ACCESS1-3 rcp85"""
+    return os.path.join(data_dir, 'created', 'wdir_ACCESS1-3.nc')
+
 
 @pytest.fixture(scope='session')
 def path_uas_cmcccm(data_dir):
@@ -43,6 +55,7 @@ def path_uas_cmcccm(data_dir):
 def path_vas_cmcccm(data_dir):
     """Path to daily vas CMCC-CM rcp85"""
     return os.path.join(data_dir, 'CMCC-CM', 'vas_day_CMCC-CM_rcp85_r1i1p1_1year_spatial_clip.nc')
+
 
 @pytest.fixture(scope='session')
 def path_pr_cnrmcm5(data_dir):
@@ -73,3 +86,8 @@ def path_wdir_cnrmcm5_adj_coords(data_dir):
     """Path to daily vas CNRM-CM5 rcp85"""
     return os.path.join(data_dir, 'created', 'access13_wdir_gridadj_truth.npy')
 
+
+@pytest.fixture(scope='session')
+def path_monsoon_access13(data_dir):
+    """Path to monsoon index results for access13"""
+    return os.path.join(data_dir, 'created', 'monsoon_index_access13_pr5plus_180270wd_nomask.nc')

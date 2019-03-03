@@ -1,0 +1,1 @@
+PYTHONPATH='.' luigi --module basic_luigi WindDirectionUC --uas_filepath /home/rwegener/repos/wnpmonsoon/tests/data/ACCESS1-3//uas_day_ACCESS1-3_rcp85_r1i1p1_1year_spatial_clip.nc --vas_filepath /home/rwegener/repos/wnpmonsoon/tests/data/ACCESS1-3//pr_day_ACCESS1-3_rcp85_r1i1p1_1year_spatial_clip.nc/vas_day_ACCESS1-3_rcp85_r1i1p1_1year_spatial_clip.nc
