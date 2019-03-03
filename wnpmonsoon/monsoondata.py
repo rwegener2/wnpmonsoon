@@ -8,15 +8,14 @@ from netCDF4 import num2date
 import netCDF4
 
 
-def criteria_generator(pr_min=-np.inf, pr_max=np.inf, wd_min=-np.inf, wd_max=np.inf, consecutive_days=0):
+def criteria_generator(pr_min=-np.inf, pr_max=np.inf, wd_min=-np.inf, wd_max=np.inf):
     def pr_criteria(pr):
-        return ((pr_min < pr) & (pr < pr_max)).astype(int)
+        return ((pr_min <= pr) & (pr <= pr_max)).astype(int)
 
     def wd_criteria(wd):
-        return ((wd_min < wd) & (wd < wd_max)).astype(int)
+        return ((wd_min <= wd) & (wd <= wd_max)).astype(int)
 
-    criteria_dict = {'pr_min': pr_min, 'pr_max': pr_max, 'wd_min': wd_min, 'wd_max': wd_max,
-                     'consecutive_days': consecutive_days}
+    criteria_dict = {'pr_min': pr_min, 'pr_max': pr_max, 'wd_min': wd_min, 'wd_max': wd_max}
     return {'precip': pr_criteria, 'wind_dir': wd_criteria, 'summary_dict': criteria_dict}
 
 
@@ -45,6 +44,7 @@ class MonsoonData(NCdata):
         NCmonsoon = MonsoonData.__new__(cls)
 
         # Check that pr and wind_dir have properly aligning grids
+        # TODO shouldn't need this if statement if align_grids always works properly
         if pr.lats != wind_dir.lats or pr.lons != wind_dir.lons:
             pr.variable, wind_dir.variable, new_lats, new_lons = cls.align_grids(pr, wind_dir)
             pr.lats = wind_dir.lats = new_lats
@@ -64,7 +64,7 @@ class MonsoonData(NCdata):
         # Add newly calculated data to the monsoon object
         NCmonsoon.var_name = 'monsoon'
         NCmonsoon.var_units = 'boolean'
-        NCmonsoon.variable = blank_monsoon
+        NCmonsoon.variable = blank_monsoon.astype(float)
 
         # Created combined global attributes
         monsoon_globalattrs = {}
@@ -80,7 +80,7 @@ class MonsoonData(NCdata):
                 monsoon_globalattrs[key + '_pr'] = pr.globalattrs[key]
                 monsoon_globalattrs[key + '_wd'] = wind_dir.globalattrs[key]
 
-        monsoon_globalattrs['monsoon_criteria'] = criteria['summary_dict']
+        # monsoon_globalattrs['monsoon_criteria'] = criteria['summary_dict']
         NCmonsoon.globalattrs = monsoon_globalattrs
         return NCmonsoon
 
